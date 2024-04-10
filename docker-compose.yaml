@@ -9,7 +9,8 @@ services:
       - es-data:/usr/share/elasticsearch/data
     tty: true
     environment:
-      discovery.type: single-node
+      - "discovery.type=single-node"
+      - "xpack.security.enabled=false"
 volumes:
   es-data:
     driver: local

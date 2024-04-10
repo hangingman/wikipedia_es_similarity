@@ -2,16 +2,37 @@ import MeCab
 import numpy as np
 
 
-class MeCabTokenizer():
+class MeCabTokenizer:
     def __init__(self, mecab_args=""):
+        # 並列処理時に "TypeError: cannot pickle 'Tagger' object" が発生するので__reduce_ex__で対策する
+        # https://tma15.github.io/blog/2020/11/22/pythonmecab%E3%81%AEtagger%E3%82%AA%E3%83%96%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88%E3%82%92%E6%8C%81%E3%81%A4%E5%8D%98%E8%AA%9E%E5%88%86%E5%89%B2%E5%99%A8%E3%82%92pickle%E3%81%A7%E4%BF%9D%E5%AD%98%E3%81%99%E3%82%8B%E6%96%B9%E6%B3%95/
+        self.mecab_args = mecab_args
         self.tagger = MeCab.Tagger(mecab_args)
-        self.tagger.parse("")
 
     def tokenize(self, text):
         return self.tagger.parse(text).strip().split(" ")
 
+    def __getstate__(self):
+        return {'mecab_args': self.mecab_args}
 
-class SWEM():
+    def __setstate__(self, state):
+        for k, v in state.items():
+            setattr(self, k, v)
+
+    def __getnewargs__(self) -> tuple:
+        return (self.mecab_args, )
+
+    def __reduce_ex__(self, proto):
+        func = MeCabTokenizer
+        args = self.__getnewargs__()
+        state = self.__getstate__()
+        listitems = None
+        dictitems = None
+        rv = (func, args, state, listitems, dictitems)
+        return rv
+
+
+class SWEM:
     """
     Simple Word-Embeddingbased Models (SWEM)
     https://arxiv.org/abs/1805.09843v1
