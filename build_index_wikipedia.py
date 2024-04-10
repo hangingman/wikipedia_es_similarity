@@ -31,7 +31,10 @@ tokenizer = MeCabTokenizer("-O wakati")
 swem = SWEM(w2v, tokenizer)
 
 # elasticsearch
-client = Elasticsearch()
+# ref: https://www.elastic.co/guide/en/elasticsearch/client/python-api/current/connecting.html
+client = Elasticsearch(
+    "https://localhost:9200",
+)
 BATCH_SIZE = 1000
 INDEX_NAME = "wikipedia"
 
@@ -43,7 +46,7 @@ with open("index.json") as index_file:
 
 docs = []
 count = 0
-with gzip.open("jawiki-20190826-cirrussearch-content.json.gz") as f:
+with gzip.open("jawiki-20240408-cirrussearch-content.json.gz") as f:
     for line in f:
         json_line = json.loads(line)
         if "index" not in json_line:
